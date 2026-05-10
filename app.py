@@ -417,32 +417,36 @@ st.markdown("<p style='color:#555;margin-top:-1rem;margin-bottom:2rem;'>Stacking
             unsafe_allow_html=True)
 
 # ── Team selectors ────────────────────────────────────────────────────────────
-default_home_idx = 0
-default_away_idx = 0
+if "home_sel" not in st.session_state:
+    st.session_state["home_sel"] = "LA Lakers (LAL)" if "LA Lakers (LAL)" in team_options else team_options[0]
+if "away_sel" not in st.session_state:
+    st.session_state["away_sel"] = "Golden State Warriors (GSW)" if "Golden State Warriors (GSW)" in team_options else team_options[1]
 
 if st.session_state["quick_home"]:
     qh = st.session_state["quick_home"]
     key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
     if key in team_options:
-        default_home_idx = team_options.index(key)
-elif "LA Lakers (LAL)" in team_options:
-    default_home_idx = team_options.index("LA Lakers (LAL)")
+        st.session_state["home_sel"] = key
 
 if st.session_state["quick_away"]:
     qa = st.session_state["quick_away"]
     key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
     if key in team_options:
-        default_away_idx = team_options.index(key)
-elif "Golden State Warriors (GSW)" in team_options:
-    default_away_idx = team_options.index("Golden State Warriors (GSW)")
+        st.session_state["away_sel"] = key
 
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
-    home_sel = st.selectbox("Home", team_options, index=default_home_idx, label_visibility="collapsed")
+    home_sel = st.selectbox("Home", team_options,
+                            index=team_options.index(st.session_state["home_sel"]),
+                            key="home_sel",
+                            label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
-    away_sel = st.selectbox("Away", team_options, index=default_away_idx, label_visibility="collapsed")
+    away_sel = st.selectbox("Away", team_options,
+                            index=team_options.index(st.session_state["away_sel"]),
+                            key="away_sel",
+                            label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
 away_abbr = abbr_map[away_sel]
