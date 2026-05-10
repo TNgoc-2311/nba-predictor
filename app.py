@@ -477,6 +477,17 @@ with col2:
 home_abbr = abbr_map[home_sel]
 away_abbr = abbr_map[away_sel]
 
+st.write("DEBUG:", {
+    "home_sel": st.session_state.get("home_sel"),
+    "away_sel": st.session_state.get("away_sel"),
+    "auto_predict": st.session_state.get("auto_predict"),
+    "quick_home": st.session_state.get("quick_home"),
+    "quick_away": st.session_state.get("quick_away"),
+    "home_abbr": home_abbr,
+    "away_abbr": away_abbr,
+})
+
+
 # Logo display
 lc1, lc2, lc3 = st.columns([2, 1, 2])
 with lc1:
