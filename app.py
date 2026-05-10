@@ -450,13 +450,15 @@ if st.session_state["quick_home"]:
     qh_key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
     if qh_key in team_options:
         st.session_state["home_sel"] = qh_key
-
+    st.session_state["quick_home"] = None
+    
 if st.session_state["quick_away"]:
     qa = st.session_state["quick_away"]
     qa_key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
     if qa_key in team_options:
         st.session_state["away_sel"] = qa_key
-
+    st.session_state["quick_away"] = None
+    
 home_idx = team_options.index(st.session_state["home_sel"]) if st.session_state["home_sel"] in team_options else 0
 away_idx = team_options.index(st.session_state["away_sel"]) if st.session_state["away_sel"] in team_options else 0
 
