@@ -273,34 +273,58 @@ abbr_map = {f"{TEAM_NAMES.get(t, t)} ({t})": t for t in all_teams}
 
 # ── Feature builder (V3 — 21 features) ───────────────────────────────────────
 def build_features(home_team, away_team):
-    home_rows = df[df["HOME_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
-    away_rows = df[df["AWAY_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
-    if home_rows.empty or away_rows.empty:
+    h_as_home = df[df["HOME_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
+    h_as_away = df[df["AWAY_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
+
+    if not h_as_home.empty and not h_as_away.empty:
+        h_src = "home" if h_as_home.iloc[0]["GAME_DATE"] >= h_as_away.iloc[0]["GAME_DATE"] else "away"
+    elif not h_as_home.empty:
+        h_src = "home"
+    elif not h_as_away.empty:
+        h_src = "away"
+    else:
         return None
-    h = home_rows.iloc[0]
-    a = away_rows.iloc[0]
+
+    a_as_home = df[df["HOME_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
+    a_as_away = df[df["AWAY_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
+
+    if not a_as_home.empty and not a_as_away.empty:
+        a_src = "home" if a_as_home.iloc[0]["GAME_DATE"] >= a_as_away.iloc[0]["GAME_DATE"] else "away"
+    elif not a_as_home.empty:
+        a_src = "home"
+    elif not a_as_away.empty:
+        a_src = "away"
+    else:
+        return None
+        
+    h = h_as_home.iloc[0] if h_src == "home" else h_as_away.iloc[0]
+    h_pre = "HOME_" if h_src == "home" else "AWAY_"
+
+    a = a_as_home.iloc[0] if a_src == "home" else a_as_away.iloc[0]
+    a_pre = "HOME_" if a_src == "home" else "AWAY_"
+
     row = {
-        "DIFF_PTS":          h["HOME_EMA_PTS"]         - a["AWAY_EMA_PTS"],
-        "DIFF_FG_PCT":       h["HOME_EMA_FG_PCT"]       - a["AWAY_EMA_FG_PCT"],
-        "DIFF_FG3_PCT":      h["HOME_EMA_FG3_PCT"]      - a["AWAY_EMA_FG3_PCT"],
-        "DIFF_FT_PCT":       h["HOME_EMA_FT_PCT"]       - a["AWAY_EMA_FT_PCT"],
-        "DIFF_OREB":         h["HOME_EMA_OREB"]         - a["AWAY_EMA_OREB"],
-        "DIFF_DREB":         h["HOME_EMA_DREB"]         - a["AWAY_EMA_DREB"],
-        "DIFF_AST":          h["HOME_EMA_AST"]          - a["AWAY_EMA_AST"],
-        "DIFF_STL":          h["HOME_EMA_STL"]          - a["AWAY_EMA_STL"],
-        "DIFF_BLK":          h["HOME_EMA_BLK"]          - a["AWAY_EMA_BLK"],
-        "DIFF_TOV":          h["HOME_EMA_TOV"]          - a["AWAY_EMA_TOV"],
-        "DIFF_WIN_PCT":      h["HOME_CURRENT_WIN_PCT"]  - a["AWAY_CURRENT_WIN_PCT"],
-        "DIFF_WIN_STREAK":   h["HOME_WIN_STREAK"]       - a["AWAY_WIN_STREAK"],
-        "DIFF_REST_DAYS":    h["HOME_REST_DAYS"]        - a["AWAY_REST_DAYS"],
-        "DIFF_ELO":          h["HOME_ELO"]              - a["AWAY_ELO"],
-        "DIFF_eFG_PCT":      h["HOME_EMA_eFG_PCT"]      - a["AWAY_EMA_eFG_PCT"],
-        "DIFF_TO_RATIO":     h["HOME_EMA_TO_RATIO"]     - a["AWAY_EMA_TO_RATIO"],
-        "DIFF_FT_RATE":      h["HOME_EMA_FT_RATE"]      - a["AWAY_EMA_FT_RATE"],
-        "DIFF_OREB_PCT":     h["HOME_OREB_PCT"]         - a["AWAY_OREB_PCT"],
-        "DIFF_PTS_ALLOWED":  h["HOME_EMA_PTS_ALLOWED"]  - a["AWAY_EMA_PTS_ALLOWED"],  # V3 mới
-        "HOME_IS_B2B":       h["HOME_IS_B2B"],
-        "AWAY_IS_B2B":       a["AWAY_IS_B2B"],
+        "DIFF_PTS":         h[f"{h_pre}EMA_PTS"]          - a[f"{a_pre}EMA_PTS"],
+        "DIFF_FG_PCT":      h[f"{h_pre}EMA_FG_PCT"]        - a[f"{a_pre}EMA_FG_PCT"],
+        "DIFF_FG3_PCT":     h[f"{h_pre}EMA_FG3_PCT"]       - a[f"{a_pre}EMA_FG3_PCT"],
+        "DIFF_FT_PCT":      h[f"{h_pre}EMA_FT_PCT"]        - a[f"{a_pre}EMA_FT_PCT"],
+        "DIFF_OREB":        h[f"{h_pre}EMA_OREB"]          - a[f"{a_pre}EMA_OREB"],
+        "DIFF_DREB":        h[f"{h_pre}EMA_DREB"]          - a[f"{a_pre}EMA_DREB"],
+        "DIFF_AST":         h[f"{h_pre}EMA_AST"]           - a[f"{a_pre}EMA_AST"],
+        "DIFF_STL":         h[f"{h_pre}EMA_STL"]           - a[f"{a_pre}EMA_STL"],
+        "DIFF_BLK":         h[f"{h_pre}EMA_BLK"]           - a[f"{a_pre}EMA_BLK"],
+        "DIFF_TOV":         h[f"{h_pre}EMA_TOV"]           - a[f"{a_pre}EMA_TOV"],
+        "DIFF_WIN_PCT":     h[f"{h_pre}CURRENT_WIN_PCT"]   - a[f"{a_pre}CURRENT_WIN_PCT"],
+        "DIFF_WIN_STREAK":  h[f"{h_pre}WIN_STREAK"]        - a[f"{a_pre}WIN_STREAK"],
+        "DIFF_REST_DAYS":   h[f"{h_pre}REST_DAYS"]         - a[f"{a_pre}REST_DAYS"],
+        "DIFF_ELO":         h[f"{h_pre}ELO"]               - a[f"{a_pre}ELO"],
+        "DIFF_eFG_PCT":     h[f"{h_pre}EMA_eFG_PCT"]       - a[f"{a_pre}EMA_eFG_PCT"],
+        "DIFF_TO_RATIO":    h[f"{h_pre}EMA_TO_RATIO"]      - a[f"{a_pre}EMA_TO_RATIO"],
+        "DIFF_FT_RATE":     h[f"{h_pre}EMA_FT_RATE"]       - a[f"{a_pre}EMA_FT_RATE"],
+        "DIFF_OREB_PCT":    h[f"{h_pre}OREB_PCT"]          - a[f"{a_pre}OREB_PCT"],
+        "DIFF_PTS_ALLOWED": h[f"{h_pre}EMA_PTS_ALLOWED"]   - a[f"{a_pre}EMA_PTS_ALLOWED"],
+        "HOME_IS_B2B":      h[f"{h_pre}IS_B2B"],
+        "AWAY_IS_B2B":      a[f"{a_pre}IS_B2B"],
     }
     return pd.DataFrame([row])[FEATURES]
 
