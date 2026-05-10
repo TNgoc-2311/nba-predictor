@@ -501,9 +501,10 @@ with lc3:
                 unsafe_allow_html=True)
 
 st.markdown("<div class='predict-btn'>", unsafe_allow_html=True)
-predict = st.button("DỰ ĐOÁN KẾT QUẢ") or st.session_state["auto_predict"]
-st.markdown("</div>", unsafe_allow_html=True)
+_auto = st.session_state["auto_predict"]
 st.session_state["auto_predict"] = False
+predict = st.button("DỰ ĐOÁN KẾT QUẢ") or _auto
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
