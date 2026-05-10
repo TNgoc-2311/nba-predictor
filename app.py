@@ -440,7 +440,6 @@ st.markdown("<h1>🏀 NBA PREDICTOR</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#555;margin-top:-1rem;margin-bottom:2rem;'>Stacking Ensemble · XGBoost + LightGBM + Platt Calibration · V3</p>",
             unsafe_allow_html=True)
 
-# ── Team selectors ────────────────────────────────────────────────────────────
 if "home_sel" not in st.session_state:
     st.session_state["home_sel"] = "LA Lakers (LAL)" if "LA Lakers (LAL)" in team_options else team_options[0]
 if "away_sel" not in st.session_state:
@@ -448,26 +447,29 @@ if "away_sel" not in st.session_state:
 
 if st.session_state["quick_home"]:
     qh = st.session_state["quick_home"]
-    key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
-    if key in team_options:
-        st.session_state["home_sel"] = key
+    qh_key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
+    if qh_key in team_options:
+        st.session_state["home_sel"] = qh_key
 
 if st.session_state["quick_away"]:
     qa = st.session_state["quick_away"]
-    key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
-    if key in team_options:
-        st.session_state["away_sel"] = key
+    qa_key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
+    if qa_key in team_options:
+        st.session_state["away_sel"] = qa_key
+
+home_idx = team_options.index(st.session_state["home_sel"]) if st.session_state["home_sel"] in team_options else 0
+away_idx = team_options.index(st.session_state["away_sel"]) if st.session_state["away_sel"] in team_options else 0
 
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
     home_sel = st.selectbox("Home", team_options,
-                            key="home_sel",
+                            index=home_idx,
                             label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
     away_sel = st.selectbox("Away", team_options,
-                            key="away_sel",
+                            index=away_idx,
                             label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
@@ -655,6 +657,8 @@ else:
                 h_key = f"{TEAM_NAMES.get(h, h)} ({h})"
                 a_key = f"{TEAM_NAMES.get(a, a)} ({a})"
                 if h_key in team_options and a_key in team_options:
+                    st.session_state["home_sel"] = h_key
+                    st.session_state["away_sel"] = a_key
                     st.session_state["quick_home"] = h
                     st.session_state["quick_away"] = a
                     st.session_state["auto_predict"] = True 
