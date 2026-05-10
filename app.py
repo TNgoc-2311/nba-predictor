@@ -403,6 +403,8 @@ if "quick_home" not in st.session_state:
     st.session_state["quick_home"] = None
 if "quick_away" not in st.session_state:
     st.session_state["quick_away"] = None
+if "auto_predict" not in st.session_state:
+    st.session_state["auto_predict"] = False
 
 query_params = st.query_params
 if "home" in query_params and "away" in query_params:
@@ -423,16 +425,15 @@ if st.session_state["quick_home"]:
     key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
     if key in team_options:
         default_home_idx = team_options.index(key)
+elif "LA Lakers (LAL)" in team_options:
+    default_home_idx = team_options.index("LA Lakers (LAL)")
 
 if st.session_state["quick_away"]:
     qa = st.session_state["quick_away"]
     key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
     if key in team_options:
         default_away_idx = team_options.index(key)
-
-if default_home_idx == 0 and "LA Lakers (LAL)" in team_options:
-    default_home_idx = team_options.index("LA Lakers (LAL)")
-if default_away_idx == 0 and "Golden State Warriors (GSW)" in team_options:
+elif "Golden State Warriors (GSW)" in team_options:
     default_away_idx = team_options.index("Golden State Warriors (GSW)")
 
 col1, col2 = st.columns(2)
@@ -459,8 +460,9 @@ with lc3:
                 unsafe_allow_html=True)
 
 st.markdown("<div class='predict-btn'>", unsafe_allow_html=True)
-predict = st.button("DỰ ĐOÁN KẾT QUẢ")
+predict = st.button("DỰ ĐOÁN KẾT QUẢ") or st.session_state["auto_predict"]
 st.markdown("</div>", unsafe_allow_html=True)
+st.session_state["auto_predict"] = False
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
@@ -629,6 +631,7 @@ else:
                 if h_key in team_options and a_key in team_options:
                     st.session_state["quick_home"] = h
                     st.session_state["quick_away"] = a
+                    st.session_state["auto_predict"] = True 
                     st.rerun()
 
     st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
