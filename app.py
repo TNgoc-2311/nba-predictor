@@ -502,9 +502,9 @@ with lc3:
 
 st.markdown("<div class='predict-btn'>", unsafe_allow_html=True)
 _auto = st.session_state["auto_predict"]
-st.session_state["auto_predict"] = False
 predict = st.button("DỰ ĐOÁN KẾT QUẢ") or _auto
 st.markdown("</div>", unsafe_allow_html=True)
+st.session_state["auto_predict"] = False  # reset SAU khi đã dùng
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
@@ -678,7 +678,6 @@ else:
                     st.session_state["quick_home"] = h
                     st.session_state["quick_away"] = a
                     st.session_state["auto_predict"] = True 
-                    st.rerun()
 
     st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
                 unsafe_allow_html=True)
