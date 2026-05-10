@@ -507,10 +507,12 @@ st.session_state["auto_predict"] = False
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
+    st.write("PREDICT TRIGGERED:", home_abbr, away_abbr)
     if home_abbr == away_abbr:
         st.warning("Vui lòng chọn 2 đội khác nhau!")
     else:
         X = build_features(home_abbr, away_abbr)
+        st.write("X is None:", X is None)
         if X is None:
             st.error("Không đủ dữ liệu để dự đoán.")
         else:
