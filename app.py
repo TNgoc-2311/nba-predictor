@@ -438,13 +438,11 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
     home_sel = st.selectbox("Home", team_options,
-                            index=team_options.index(st.session_state["home_sel"]),
                             key="home_sel",
                             label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
     away_sel = st.selectbox("Away", team_options,
-                            index=team_options.index(st.session_state["away_sel"]),
                             key="away_sel",
                             label_visibility="collapsed")
 
