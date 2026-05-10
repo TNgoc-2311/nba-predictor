@@ -4,7 +4,10 @@ import numpy as np
 import joblib
 import json
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# Định nghĩa múi giờ VN (UTC+7)
+VN_TZ = timezone(timedelta(hours=7))
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -344,7 +347,7 @@ def get_latest_stats(team, role):
 @st.cache_data(ttl=3600)
 def fetch_upcoming_schedule(days_ahead=7):
     games = []
-    today = datetime.now()
+    today = datetime.now(VN_TZ).replace(tzinfo=None)
 
     # Source 1: balldontlie.io
     try:
@@ -372,7 +375,7 @@ def fetch_upcoming_schedule(days_ahead=7):
     try:
         url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
         for delta in range(days_ahead):
-            date_str = (today + timedelta(days=delta)).strftime("%Y%m%d")
+            date_str = (datetime.now(VN_TZ).replace(tzinfo=None) + timedelta(days=delta)).strftime("%Y%m%d")
             resp = requests.get(url, params={"dates": date_str},
                                 headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
             if resp.status_code != 200:
@@ -577,8 +580,8 @@ if not upcoming:
     </div>
     """, unsafe_allow_html=True)
 else:
-    today_str    = datetime.now().strftime("%d/%m/%Y")
-    tomorrow_str = (datetime.now() + timedelta(days=1)).strftime("%d/%m/%Y")
+    today_str    = datetime.now(VN_TZ).strftime("%d/%m/%Y")
+    tomorrow_str = (datetime.now(VN_TZ) + timedelta(days=1)).strftime("%d/%m/%Y")
 
     def date_label(d):
         if d == today_str:    return "🔴 HÔM NAY"
