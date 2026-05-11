@@ -4,10 +4,7 @@ import numpy as np
 import joblib
 import json
 import requests
-from datetime import datetime, timedelta, timezone
-
-# Định nghĩa múi giờ VN (UTC+7)
-VN_TZ = timezone(timedelta(hours=7))
+from datetime import datetime, timedelta
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -273,58 +270,34 @@ abbr_map = {f"{TEAM_NAMES.get(t, t)} ({t})": t for t in all_teams}
 
 # ── Feature builder (V3 — 21 features) ───────────────────────────────────────
 def build_features(home_team, away_team):
-    h_as_home = df[df["HOME_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
-    h_as_away = df[df["AWAY_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
-
-    if not h_as_home.empty and not h_as_away.empty:
-        h_src = "home" if h_as_home.iloc[0]["GAME_DATE"] >= h_as_away.iloc[0]["GAME_DATE"] else "away"
-    elif not h_as_home.empty:
-        h_src = "home"
-    elif not h_as_away.empty:
-        h_src = "away"
-    else:
+    home_rows = df[df["HOME_TEAM"] == home_team].sort_values("GAME_DATE", ascending=False)
+    away_rows = df[df["AWAY_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
+    if home_rows.empty or away_rows.empty:
         return None
-
-    a_as_home = df[df["HOME_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
-    a_as_away = df[df["AWAY_TEAM"] == away_team].sort_values("GAME_DATE", ascending=False)
-
-    if not a_as_home.empty and not a_as_away.empty:
-        a_src = "home" if a_as_home.iloc[0]["GAME_DATE"] >= a_as_away.iloc[0]["GAME_DATE"] else "away"
-    elif not a_as_home.empty:
-        a_src = "home"
-    elif not a_as_away.empty:
-        a_src = "away"
-    else:
-        return None
-        
-    h = h_as_home.iloc[0] if h_src == "home" else h_as_away.iloc[0]
-    h_pre = "HOME_" if h_src == "home" else "AWAY_"
-
-    a = a_as_home.iloc[0] if a_src == "home" else a_as_away.iloc[0]
-    a_pre = "HOME_" if a_src == "home" else "AWAY_"
-
+    h = home_rows.iloc[0]
+    a = away_rows.iloc[0]
     row = {
-        "DIFF_PTS":         h[f"{h_pre}EMA_PTS"]          - a[f"{a_pre}EMA_PTS"],
-        "DIFF_FG_PCT":      h[f"{h_pre}EMA_FG_PCT"]        - a[f"{a_pre}EMA_FG_PCT"],
-        "DIFF_FG3_PCT":     h[f"{h_pre}EMA_FG3_PCT"]       - a[f"{a_pre}EMA_FG3_PCT"],
-        "DIFF_FT_PCT":      h[f"{h_pre}EMA_FT_PCT"]        - a[f"{a_pre}EMA_FT_PCT"],
-        "DIFF_OREB":        h[f"{h_pre}EMA_OREB"]          - a[f"{a_pre}EMA_OREB"],
-        "DIFF_DREB":        h[f"{h_pre}EMA_DREB"]          - a[f"{a_pre}EMA_DREB"],
-        "DIFF_AST":         h[f"{h_pre}EMA_AST"]           - a[f"{a_pre}EMA_AST"],
-        "DIFF_STL":         h[f"{h_pre}EMA_STL"]           - a[f"{a_pre}EMA_STL"],
-        "DIFF_BLK":         h[f"{h_pre}EMA_BLK"]           - a[f"{a_pre}EMA_BLK"],
-        "DIFF_TOV":         h[f"{h_pre}EMA_TOV"]           - a[f"{a_pre}EMA_TOV"],
-        "DIFF_WIN_PCT":     h[f"{h_pre}CURRENT_WIN_PCT"]   - a[f"{a_pre}CURRENT_WIN_PCT"],
-        "DIFF_WIN_STREAK":  h[f"{h_pre}WIN_STREAK"]        - a[f"{a_pre}WIN_STREAK"],
-        "DIFF_REST_DAYS":   h[f"{h_pre}REST_DAYS"]         - a[f"{a_pre}REST_DAYS"],
-        "DIFF_ELO":         h[f"{h_pre}ELO"]               - a[f"{a_pre}ELO"],
-        "DIFF_eFG_PCT":     h[f"{h_pre}EMA_eFG_PCT"]       - a[f"{a_pre}EMA_eFG_PCT"],
-        "DIFF_TO_RATIO":    h[f"{h_pre}EMA_TO_RATIO"]      - a[f"{a_pre}EMA_TO_RATIO"],
-        "DIFF_FT_RATE":     h[f"{h_pre}EMA_FT_RATE"]       - a[f"{a_pre}EMA_FT_RATE"],
-        "DIFF_OREB_PCT":    h[f"{h_pre}OREB_PCT"]          - a[f"{a_pre}OREB_PCT"],
-        "DIFF_PTS_ALLOWED": h[f"{h_pre}EMA_PTS_ALLOWED"]   - a[f"{a_pre}EMA_PTS_ALLOWED"],
-        "HOME_IS_B2B":      h[f"{h_pre}IS_B2B"],
-        "AWAY_IS_B2B":      a[f"{a_pre}IS_B2B"],
+        "DIFF_PTS":          h["HOME_EMA_PTS"]         - a["AWAY_EMA_PTS"],
+        "DIFF_FG_PCT":       h["HOME_EMA_FG_PCT"]       - a["AWAY_EMA_FG_PCT"],
+        "DIFF_FG3_PCT":      h["HOME_EMA_FG3_PCT"]      - a["AWAY_EMA_FG3_PCT"],
+        "DIFF_FT_PCT":       h["HOME_EMA_FT_PCT"]       - a["AWAY_EMA_FT_PCT"],
+        "DIFF_OREB":         h["HOME_EMA_OREB"]         - a["AWAY_EMA_OREB"],
+        "DIFF_DREB":         h["HOME_EMA_DREB"]         - a["AWAY_EMA_DREB"],
+        "DIFF_AST":          h["HOME_EMA_AST"]          - a["AWAY_EMA_AST"],
+        "DIFF_STL":          h["HOME_EMA_STL"]          - a["AWAY_EMA_STL"],
+        "DIFF_BLK":          h["HOME_EMA_BLK"]          - a["AWAY_EMA_BLK"],
+        "DIFF_TOV":          h["HOME_EMA_TOV"]          - a["AWAY_EMA_TOV"],
+        "DIFF_WIN_PCT":      h["HOME_CURRENT_WIN_PCT"]  - a["AWAY_CURRENT_WIN_PCT"],
+        "DIFF_WIN_STREAK":   h["HOME_WIN_STREAK"]       - a["AWAY_WIN_STREAK"],
+        "DIFF_REST_DAYS":    h["HOME_REST_DAYS"]        - a["AWAY_REST_DAYS"],
+        "DIFF_ELO":          h["HOME_ELO"]              - a["AWAY_ELO"],
+        "DIFF_eFG_PCT":      h["HOME_EMA_eFG_PCT"]      - a["AWAY_EMA_eFG_PCT"],
+        "DIFF_TO_RATIO":     h["HOME_EMA_TO_RATIO"]     - a["AWAY_EMA_TO_RATIO"],
+        "DIFF_FT_RATE":      h["HOME_EMA_FT_RATE"]      - a["AWAY_EMA_FT_RATE"],
+        "DIFF_OREB_PCT":     h["HOME_OREB_PCT"]         - a["AWAY_OREB_PCT"],
+        "DIFF_PTS_ALLOWED":  h["HOME_EMA_PTS_ALLOWED"]  - a["AWAY_EMA_PTS_ALLOWED"],  # V3 mới
+        "HOME_IS_B2B":       h["HOME_IS_B2B"],
+        "AWAY_IS_B2B":       a["AWAY_IS_B2B"],
     }
     return pd.DataFrame([row])[FEATURES]
 
@@ -368,82 +341,175 @@ def get_latest_stats(team, role):
     return stats, latest["GAME_DATE"].strftime("%d/%m/%Y")
 
 # ── Fetch upcoming schedule ───────────────────────────────────────────────────
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=1800)
 def fetch_upcoming_schedule(days_ahead=7):
+    """
+    Lấy lịch thi đấu sắp tới từ multiple sources.
+    Priority: balldontlie.io → ESPN API → manual fallback
+    """
     games = []
-    today = datetime.now(VN_TZ).replace(tzinfo=None)
+    today = datetime.now()
 
-    # Source 1: balldontlie.io
+    # Source 1: balldontlie.io (ưu tiên)
     try:
         start_date = today.strftime("%Y-%m-%d")
         end_date   = (today + timedelta(days=days_ahead)).strftime("%Y-%m-%d")
         url = "https://api.balldontlie.io/v1/games"
-        resp = requests.get(url, params={"start_date": start_date, "end_date": end_date, "per_page": 100},
-                            headers={"Authorization": "0"}, timeout=10)
+        resp = requests.get(
+            url, 
+            params={"start_date": start_date, "end_date": end_date, "per_page": 100},
+            headers={"Authorization": "0"}, 
+            timeout=10
+        )
         if resp.status_code == 200:
-            for g in resp.json().get("data", []):
-                h = g.get("home_team", {}).get("abbreviation", "")
-                a = g.get("visitor_team", {}).get("abbreviation", "")
+            data = resp.json().get("data", [])
+            for g in data:
+                h = g.get("home_team", {}).get("abbreviation", "").upper()
+                a = g.get("visitor_team", {}).get("abbreviation", "").upper()
                 d = g.get("date", "")[:10]
-                if h and a and d:
+                game_time_str = g.get("date", "")[11:16] if len(g.get("date", "")) > 10 else "TBD"
+                
+                if h and a and d and h in TEAM_NAMES and a in TEAM_NAMES:
                     dt = datetime.strptime(d, "%Y-%m-%d")
                     status = g.get("status", "TBD")
-                    games.append({"date": dt.strftime("%d/%m/%Y"), "date_dt": dt,
-                                  "home": h, "away": a, "time": status})
+                    
+                    # Format thời gian
+                    if status == "Final" or status == "Final/OT":
+                        time_display = f"✓ {status}"
+                    else:
+                        time_display = game_time_str if game_time_str != "TBD" else "TBD"
+                    
+                    games.append({
+                        "date": dt.strftime("%d/%m/%Y"),
+                        "date_dt": dt,
+                        "home": h,
+                        "away": a,
+                        "time": time_display,
+                        "status": status
+                    })
+            
             if games:
-                return games
+                return sorted(games, key=lambda x: x["date_dt"])
+    except requests.exceptions.RequestException:
+        pass
     except Exception:
         pass
 
-    # Source 2: ESPN API
+    # Source 2: ESPN API (fallback)
     try:
         url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
-        for delta in range(days_ahead):
-            date_str = (datetime.now(VN_TZ).replace(tzinfo=None) + timedelta(days=delta)).strftime("%Y%m%d")
-            resp = requests.get(url, params={"dates": date_str},
-                                headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
-            if resp.status_code != 200:
-                continue
-            for event in resp.json().get("events", []):
-                comps = event.get("competitions", [{}])[0]
-                home_abbr, away_abbr = "", ""
-                game_time = comps.get("status", {}).get("type", {}).get("shortDetail", "TBD")
-                for c in comps.get("competitors", []):
-                    abbr = c.get("team", {}).get("abbreviation", "")
-                    if c.get("homeAway") == "home":
-                        home_abbr = abbr
+        
+        for delta in range(min(days_ahead, 14)):  # ESPN giới hạn 14 ngày
+            try:
+                date_str = (today + timedelta(days=delta)).strftime("%Y%m%d")
+                resp = requests.get(
+                    url, 
+                    params={"dates": date_str},
+                    headers={"User-Agent": "Mozilla/5.0"}, 
+                    timeout=8
+                )
+                if resp.status_code != 200:
+                    continue
+                
+                data = resp.json()
+                for event in data.get("events", []):
+                    comps = event.get("competitions", [{}])[0]
+                    home_abbr, away_abbr = "", ""
+                    
+                    # Lấy thời gian từ event date và status
+                    event_date_str = event.get("date", "")
+                    if event_date_str:
+                        try:
+                            event_dt = datetime.fromisoformat(event_date_str.replace("Z", "+00:00"))
+                            game_time = event_dt.strftime("%H:%M")
+                        except:
+                            game_time = "TBD"
                     else:
-                        away_abbr = abbr
-                if home_abbr and away_abbr:
-                    games.append({"date": (today + timedelta(days=delta)).strftime("%d/%m/%Y"),
-                                  "date_dt": today + timedelta(days=delta),
-                                  "home": home_abbr, "away": away_abbr, "time": game_time})
-        return games
+                        game_time = "TBD"
+                    
+                    status_type = comps.get("status", {}).get("type", {})
+                    status_detail = status_type.get("shortDetail", "TBD")
+                    
+                    # Parse team abbreviations
+                    for c in comps.get("competitors", []):
+                        abbr = c.get("team", {}).get("abbreviation", "").upper()
+                        if c.get("homeAway") == "home":
+                            home_abbr = abbr
+                        else:
+                            away_abbr = abbr
+                    
+                    # Validate teams exist in TEAM_NAMES
+                    if home_abbr and away_abbr and home_abbr in TEAM_NAMES and away_abbr in TEAM_NAMES:
+                        current_date_str = (today + timedelta(days=delta)).strftime("%d/%m/%Y")
+                        
+                        # Format time display
+                        if "Final" in status_detail:
+                            time_display = f"✓ {status_detail}"
+                        else:
+                            time_display = game_time if game_time != "TBD" else "TBD"
+                        
+                        games.append({
+                            "date": current_date_str,
+                            "date_dt": today + timedelta(days=delta),
+                            "home": home_abbr,
+                            "away": away_abbr,
+                            "time": time_display,
+                            "status": status_detail
+                        })
+            except (requests.exceptions.RequestException, ValueError):
+                continue
+        
+        if games:
+            return sorted(games, key=lambda x: x["date_dt"])
     except Exception:
-        return []
+        pass
+
+    return games
 
 # ── Session state ─────────────────────────────────────────────────────────────
-if "sel_home" not in st.session_state:
-    st.session_state["sel_home"] = team_options[0]
-if "sel_away" not in st.session_state:
-    st.session_state["sel_away"] = team_options[1]
+if "quick_home" not in st.session_state:
+    st.session_state["quick_home"] = None
+if "quick_away" not in st.session_state:
+    st.session_state["quick_away"] = None
+
+query_params = st.query_params
+if "home" in query_params and "away" in query_params:
+    st.session_state["quick_home"] = query_params["home"]
+    st.session_state["quick_away"] = query_params["away"]
 
 # ── UI Header ─────────────────────────────────────────────────────────────────
 st.markdown("<h1>🏀 NBA PREDICTOR</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#555;margin-top:-1rem;margin-bottom:2rem;'>Stacking Ensemble · XGBoost + LightGBM + Platt Calibration · V3</p>",
             unsafe_allow_html=True)
 
+# ── Team selectors ────────────────────────────────────────────────────────────
+default_home_idx = 0
+default_away_idx = 0
+
+if st.session_state["quick_home"]:
+    qh = st.session_state["quick_home"]
+    key = f"{TEAM_NAMES.get(qh, qh)} ({qh})"
+    if key in team_options:
+        default_home_idx = team_options.index(key)
+
+if st.session_state["quick_away"]:
+    qa = st.session_state["quick_away"]
+    key = f"{TEAM_NAMES.get(qa, qa)} ({qa})"
+    if key in team_options:
+        default_away_idx = team_options.index(key)
+
+if default_home_idx == 0 and "LA Lakers (LAL)" in team_options:
+    default_home_idx = team_options.index("LA Lakers (LAL)")
+if default_away_idx == 0 and "Golden State Warriors (GSW)" in team_options:
+    default_away_idx = team_options.index("Golden State Warriors (GSW)")
+
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
-    home_sel = st.selectbox("Home", team_options,
-                            index=team_options.index(st.session_state["sel_home"]),
-                            label_visibility="collapsed")
+    home_sel = st.selectbox("Home", team_options, index=default_home_idx, label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
-    away_sel = st.selectbox("Away", team_options,
-                            index=team_options.index(st.session_state["sel_away"]),
-                            label_visibility="collapsed")
+    away_sel = st.selectbox("Away", team_options, index=default_away_idx, label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
 away_abbr = abbr_map[away_sel]
@@ -466,12 +532,10 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
-    st.write("PREDICT TRIGGERED:", home_abbr, away_abbr)
     if home_abbr == away_abbr:
         st.warning("Vui lòng chọn 2 đội khác nhau!")
     else:
         X = build_features(home_abbr, away_abbr)
-        st.write("X is None:", X is None)
         if X is None:
             st.error("Không đủ dữ liệu để dự đoán.")
         else:
@@ -573,37 +637,60 @@ if predict:
 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
 st.markdown("<div class='schedule-title'>📅 LỊCH THI ĐẤU SẮP TỚI</div>", unsafe_allow_html=True)
 
-with st.spinner("Đang tải lịch thi đấu..."):
+col_refresh, col_info = st.columns([1, 4])
+with col_refresh:
+    if st.button("🔄 Làm mới"):
+        st.cache_data.clear()
+        st.rerun()
+with col_info:
+    st.markdown("<p style='color:#555;font-size:0.8rem;margin-top:0.5rem;'>Cập nhật mỗi 30 phút</p>",
+                unsafe_allow_html=True)
+
+with st.spinner("⏳ Đang tải lịch thi đấu..."):
     upcoming = fetch_upcoming_schedule(days_ahead=7)
 
-if not upcoming:
+if not upcoming or len(upcoming) == 0:
     st.markdown("""
     <div class='no-games-msg'>
-        Không tìm thấy lịch thi đấu.<br>
-        <span style='font-size:0.7rem;'>Hãy kiểm tra kết nối mạng.</span>
+        ⚠️ Không tìm thấy lịch thi đấu<br>
+        <span style='font-size:0.7rem;'>• Kiểm tra kết nối mạng<br>
+        • API có thể quá tải - vui lòng thử lại sau</span>
     </div>
     """, unsafe_allow_html=True)
 else:
-    today_str    = datetime.now(VN_TZ).strftime("%d/%m/%Y")
-    tomorrow_str = (datetime.now(VN_TZ) + timedelta(days=1)).strftime("%d/%m/%Y")
+    today_str    = datetime.now().strftime("%d/%m/%Y")
+    tomorrow_str = (datetime.now() + timedelta(days=1)).strftime("%d/%m/%Y")
 
     def date_label(d):
         if d == today_str:    return "🔴 HÔM NAY"
         if d == tomorrow_str: return "🟡 NGÀY MAI"
-        return f"📆 {d}"
+        date_obj = datetime.strptime(d, "%d/%m/%Y")
+        weekday_names = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+        weekday = weekday_names[date_obj.weekday()]
+        return f"📆 {weekday} - {d}"
 
     upcoming_sorted = sorted(upcoming, key=lambda x: x["date_dt"])
     current_date = None
+    game_count = 0
 
     for game in upcoming_sorted:
-        d, h, a, t = game["date"], game["home"], game["away"], game["time"]
+        d = game.get("date", "")
+        h = game.get("home", "").upper()
+        a = game.get("away", "").upper()
+        t = game.get("time", "TBD")
+        
+        # Validate teams before display
+        if h not in TEAM_NAMES or a not in TEAM_NAMES:
+            continue
+        
+        game_count += 1
 
         if d != current_date:
             current_date = d
             st.markdown(f"<div class='schedule-date-header'>{date_label(d)}</div>",
                         unsafe_allow_html=True)
 
-        gcol1, gcol2 = st.columns([5, 1])
+        gcol1, gcol2 = st.columns([5, 1], gap="small")
         with gcol1:
             st.markdown(f"""
             <div class='game-card'>
@@ -627,12 +714,22 @@ else:
             """, unsafe_allow_html=True)
 
         with gcol2:
-            if st.button("⚡ CHỌN", key=f"sched_{h}_{a}_{d}"):
+            if st.button("⚡ DỰ ĐOÁN", key=f"sched_{h}_{a}_{d}_{game_count}"):
                 h_key = f"{TEAM_NAMES.get(h, h)} ({h})"
                 a_key = f"{TEAM_NAMES.get(a, a)} ({a})"
                 if h_key in team_options and a_key in team_options:
-                    st.session_state["home_sel"] = h_key
-                    st.session_state["away_sel"] = a_key
+                    st.session_state["quick_home"] = h
+                    st.session_state["quick_away"] = a
+                    st.rerun()
 
-    st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
-                unsafe_allow_html=True)
+    if game_count == 0:
+        st.markdown("""
+        <div class='no-games-msg'>
+            ❌ Không có trận đấu hợp lệ trong 7 ngày tới<br>
+            <span style='font-size:0.7rem;'>Dữ liệu đội bóng có thể chưa được cập nhật</span>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"<p style='color:#333;font-size:0.72rem;text-align:center;margin-top:1rem;'>"
+                    f"📊 Tổng {game_count} trận · Nguồn: balldontlie.io / ESPN API</p>",
+                    unsafe_allow_html=True)
