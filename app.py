@@ -427,8 +427,6 @@ if "quick_home" not in st.session_state:
     st.session_state["quick_home"] = None
 if "quick_away" not in st.session_state:
     st.session_state["quick_away"] = None
-if "auto_predict" not in st.session_state:
-    st.session_state["auto_predict"] = False
 
 query_params = st.query_params
 if "home" in query_params and "away" in query_params:
@@ -477,17 +475,6 @@ with col2:
 home_abbr = abbr_map[home_sel]
 away_abbr = abbr_map[away_sel]
 
-st.write("DEBUG:", {
-    "home_sel": st.session_state.get("home_sel"),
-    "away_sel": st.session_state.get("away_sel"),
-    "auto_predict": st.session_state.get("auto_predict"),
-    "quick_home": st.session_state.get("quick_home"),
-    "quick_away": st.session_state.get("quick_away"),
-    "home_abbr": home_abbr,
-    "away_abbr": away_abbr,
-})
-
-
 # Logo display
 lc1, lc2, lc3 = st.columns([2, 1, 2])
 with lc1:
@@ -501,10 +488,8 @@ with lc3:
                 unsafe_allow_html=True)
 
 st.markdown("<div class='predict-btn'>", unsafe_allow_html=True)
-_auto = st.session_state["auto_predict"]
-predict = st.button("DỰ ĐOÁN KẾT QUẢ") or _auto
+predict = st.button("DỰ ĐOÁN KẾT QUẢ")
 st.markdown("</div>", unsafe_allow_html=True)
-st.session_state["auto_predict"] = False  # reset SAU khi đã dùng
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
@@ -669,15 +654,13 @@ else:
             """, unsafe_allow_html=True)
 
         with gcol2:
-            if st.button("⚡ DỰ ĐOÁN", key=f"sched_{h}_{a}_{d}"):
+            if st.button("⚡ CHỌN", key=f"sched_{h}_{a}_{d}"):
                 h_key = f"{TEAM_NAMES.get(h, h)} ({h})"
                 a_key = f"{TEAM_NAMES.get(a, a)} ({a})"
                 if h_key in team_options and a_key in team_options:
                     st.session_state["home_sel"] = h_key
                     st.session_state["away_sel"] = a_key
-                    st.session_state["quick_home"] = h
-                    st.session_state["quick_away"] = a
-                    st.session_state["auto_predict"] = True 
+                    st.rerun() 
 
     st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
                 unsafe_allow_html=True)
