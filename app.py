@@ -423,32 +423,15 @@ def fetch_upcoming_schedule(days_ahead=7):
         return []
 
 # ── Session state ─────────────────────────────────────────────────────────────
-if "quick_home" not in st.session_state:
-    st.session_state["quick_home"] = None
-if "quick_away" not in st.session_state:
-    st.session_state["quick_away"] = None
-
-query_params = st.query_params
-if "home" in query_params and "away" in query_params:
-    st.session_state["quick_home"] = query_params["home"]
-    st.session_state["quick_away"] = query_params["away"]
+if "home_sel" not in st.session_state:
+    st.session_state["home_sel"] = team_options[0]
+if "away_sel" not in st.session_state:
+    st.session_state["away_sel"] = team_options[1]
 
 # ── UI Header ─────────────────────────────────────────────────────────────────
 st.markdown("<h1>🏀 NBA PREDICTOR</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#555;margin-top:-1rem;margin-bottom:2rem;'>Stacking Ensemble · XGBoost + LightGBM + Platt Calibration · V3</p>",
             unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("**🏠 Đội Nhà (Home)**")
-    home_sel = st.selectbox("Home", team_options,
-                            key="home_sel",
-                            label_visibility="collapsed")
-with col2:
-    st.markdown("**✈️ Đội Khách (Away)**")
-    away_sel = st.selectbox("Away", team_options,
-                            key="away_sel",
-                            label_visibility="collapsed")
 
 col1, col2 = st.columns(2)
 with col1:
