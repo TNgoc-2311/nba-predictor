@@ -99,9 +99,8 @@ section[data-testid="stForm"] { max-width: 100%; }
     align-items: center;
     justify-content: center;
     gap: 0.3rem;
-    font-size: 1.3rem;
     font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -109,6 +108,8 @@ section[data-testid="stForm"] { max-width: 100%; }
     transition: opacity 0.2s, color 0.2s;
     text-decoration: none;
     color: #666666;
+    border: none;
+    background: none;
 }
 
 .footer-btn.active {
@@ -285,6 +286,10 @@ section[data-testid="stForm"] { max-width: 100%; }
     align-items: flex-start;
 }
 
+.prob-item.away {
+    align-items: flex-end;
+}
+
 .prob-label {
     font-family: 'Inter', sans-serif;
     font-size: 0.6rem;
@@ -304,7 +309,6 @@ section[data-testid="stForm"] { max-width: 100%; }
 
 .prob-value.away {
     color: #5B8CFF;
-    text-align: right;
 }
 
 .prob-bar {
@@ -362,6 +366,7 @@ section[data-testid="stForm"] { max-width: 100%; }
 
 .score-value.spread {
     color: #F5A623;
+    font-size: 1.4rem;
 }
 
 .divider-line {
@@ -421,6 +426,11 @@ div[data-baseweb="select"] > div {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    transition: border-color 0.2s;
+}
+
+.game-card:hover {
+    border-color: #333333;
 }
 
 .game-info {
@@ -488,6 +498,27 @@ div[data-baseweb="select"] > div {
     min-width: 50px;
 }
 
+.team-name-sched {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #e0e0e0;
+}
+
+.team-abbr-sched {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    color: #888888;
+}
+
+.vs-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    color: #333333;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    padding: 0 0.5rem;
+}
+
 .schedule-date {
     font-size: 0.65rem;
     color: #666666;
@@ -497,6 +528,18 @@ div[data-baseweb="select"] > div {
     margin-top: 0.75rem;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid #1e1e1e;
+}
+
+.schedule-date-header {
+    font-size: 0.65rem;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 0;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #1e1e1e;
+    font-weight: 600;
 }
 
 .no-games-msg {
@@ -960,7 +1003,7 @@ if predict:
                             <div class='prob-label'>Home Win Prob.</div>
                             <div class='prob-value'>{home_prob:.1%}</div>
                         </div>
-                        <div class='prob-item'>
+                        <div class='prob-item away'>
                             <div class='prob-label'>Away Win Prob.</div>
                             <div class='prob-value away'>{away_prob:.1%}</div>
                         </div>
@@ -1025,17 +1068,17 @@ if predict:
                     </div>
                     """, unsafe_allow_html=True)
 
-# ── Upcoming Schedule ─────────────────────────────────────────────────────────
 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-st.markdown("<div class='schedule-title'>📅 LỊCH THI ĐẤU SẮP TỚI</div>", unsafe_allow_html=True)
+st.markdown("<p style='color:#888;font-size:0.7rem;text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.5rem;margin-top:1rem;'>📅 Lịch thi đấu sắp tới</p>",
+            unsafe_allow_html=True)
 
 col_refresh, col_info = st.columns([1, 4])
 with col_refresh:
-    if st.button("🔄 Làm mới"):
+    if st.button("🔄", key="refresh_schedule"):
         st.cache_data.clear()
         st.rerun()
 with col_info:
-    st.markdown("<p style='color:#555;font-size:0.8rem;margin-top:0.5rem;'>Cập nhật mỗi 30 phút</p>",
+    st.markdown("<p style='color:#666;font-size:0.75rem;margin-top:0.3rem;'>Cập nhật mỗi 30 phút</p>",
                 unsafe_allow_html=True)
 
 with st.spinner("⏳ Đang tải lịch thi đấu..."):
