@@ -423,10 +423,10 @@ def fetch_upcoming_schedule(days_ahead=7):
         return []
 
 # ── Session state ─────────────────────────────────────────────────────────────
-if "home_sel" not in st.session_state:
-    st.session_state["home_sel"] = team_options[0]
-if "away_sel" not in st.session_state:
-    st.session_state["away_sel"] = team_options[1]
+if "sel_home" not in st.session_state:
+    st.session_state["sel_home"] = team_options[0]
+if "sel_away" not in st.session_state:
+    st.session_state["sel_away"] = team_options[1]
 
 # ── UI Header ─────────────────────────────────────────────────────────────────
 st.markdown("<h1>🏀 NBA PREDICTOR</h1>", unsafe_allow_html=True)
@@ -437,12 +437,12 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
     home_sel = st.selectbox("Home", team_options,
-                            key="home_sel",
+                            index=team_options.index(st.session_state["sel_home"]),
                             label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
     away_sel = st.selectbox("Away", team_options,
-                            key="away_sel",
+                            index=team_options.index(st.session_state["sel_away"]),
                             label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
