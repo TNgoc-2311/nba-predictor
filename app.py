@@ -454,12 +454,12 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("**🏠 Đội Nhà (Home)**")
     home_sel = st.selectbox("Home", team_options,
-                            index=home_idx,
+                            key="home_sel",
                             label_visibility="collapsed")
 with col2:
     st.markdown("**✈️ Đội Khách (Away)**")
     away_sel = st.selectbox("Away", team_options,
-                            index=away_idx,
+                            key="away_sel",
                             label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
