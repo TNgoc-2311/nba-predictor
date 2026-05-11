@@ -660,7 +660,6 @@ else:
                 if h_key in team_options and a_key in team_options:
                     st.session_state["home_sel"] = h_key
                     st.session_state["away_sel"] = a_key
-                    st.rerun() 
 
     st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
                 unsafe_allow_html=True)
