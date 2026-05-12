@@ -351,7 +351,7 @@ VN_TZ = timezone(timedelta(hours=7))
 @st.cache_data(ttl=3600)
 def fetch_upcoming_schedule(days_ahead=7):
     games = []
-    today = datetime.now()
+    today = datetime.now(VN_TZ).replace(tzinfo=None)
 
     # Source 1: balldontlie.io
     try:
