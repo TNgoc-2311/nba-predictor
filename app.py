@@ -10,115 +10,191 @@ from datetime import datetime, timedelta, timezone
 st.set_page_config(
     page_title="NBA Game Predictor",
     page_icon="🏀",
-    layout="centered"
+    layout="wide"
 )
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-    background-color: #0d0d0d;
-    color: #f0f0f0;
+:root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface-2: #0f172a;
+    --border: #1f2a44;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-2: #38bdf8;
+    --success: #22c55e;
 }
 
-h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 3rem !important;
-    letter-spacing: 3px;
-    color: #F5A623;
+html, body, [class*="css"] {
+    font-family: 'Manrope', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.stApp {
+    background: radial-gradient(1200px 500px at 15% -10%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 55%),
+                radial-gradient(900px 400px at 85% -20%, rgba(56,189,248,0.16) 0%, rgba(56,189,248,0) 60%),
+                var(--bg);
+}
+
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 3rem 1.5rem;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 20px 60px rgba(16, 24, 40, 0.08);
+}
+
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.hero-sub {
+    color: var(--muted);
+    margin-top: 0.35rem;
+    font-size: 0.98rem;
+}
+
+.hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #dbeafe;
+    background: rgba(59, 130, 246, 0.15);
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.section {
+    margin-top: 2rem;
+}
+
+.section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.4rem;
+    margin: 0 0 1rem 0;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 16px 32px rgba(16, 24, 40, 0.06);
 }
 
 .stSelectbox label, .stMarkdown p {
-    color: #aaaaaa;
-    font-size: 0.85rem;
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
 div[data-baseweb="select"] > div {
-    background-color: #1a1a1a !important;
-    border: 1px solid #333 !important;
-    color: #f0f0f0 !important;
-    border-radius: 8px !important;
-}
-
-.predict-btn > button {
-    background: linear-gradient(135deg, #F5A623, #e8890a) !important;
-    color: #000 !important;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 1.3rem !important;
-    letter-spacing: 2px !important;
-    border: none !important;
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
     border-radius: 10px !important;
-    padding: 0.6rem 2rem !important;
-    width: 100% !important;
-    transition: opacity 0.2s !important;
+    min-height: 44px;
 }
 
-.predict-btn > button:hover { opacity: 0.85 !important; }
+.btn-primary > button {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+    color: #fff !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+    width: 100% !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary > button:hover { transform: translateY(-1px); }
+
+.btn-secondary > button {
+    background: var(--surface-2) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 0.5rem 0.9rem !important;
+    font-size: 0.85rem !important;
+    width: 100% !important;
+}
 
 .result-box {
-    background: #1a1a1a;
-    border-radius: 14px;
+    background: var(--surface);
+    border-radius: 16px;
     padding: 2rem;
     margin-top: 1.5rem;
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--border);
     text-align: center;
 }
 
 .result-winner {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.5rem;
-    color: #F5A623;
-    letter-spacing: 2px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
 }
 
-.result-sub { color: #888; font-size: 0.85rem; margin-top: 0.3rem; }
+.result-sub { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
 
 .prob-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     margin-top: 1.5rem;
     gap: 1rem;
 }
 
 .prob-card {
-    flex: 1;
-    background: #111;
-    border-radius: 10px;
+    background: var(--surface-2);
+    border-radius: 12px;
     padding: 1rem;
     text-align: center;
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--border);
 }
 
-.prob-pct { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; margin-bottom: 0.2rem; }
-.prob-label { font-size: 0.75rem; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+.prob-pct { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 0.2rem; }
+.prob-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
 .score-box {
-    background: #111;
-    border-radius: 10px;
+    background: var(--surface);
+    border-radius: 12px;
     padding: 1rem;
     margin-top: 1rem;
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--border);
     text-align: center;
 }
 
-.score-title { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-.score-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: #f0f0f0; }
-.score-sub { font-size: 0.75rem; color: #555; margin-top: 0.2rem; }
-
-.margin-badge {
-    display: inline-block;
-    background: #1e1e1e;
-    border: 1px solid #333;
-    border-radius: 20px;
-    padding: 0.3rem 1rem;
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-top: 0.8rem;
-}
+.score-title { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+.score-val { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; color: var(--text); }
+.score-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
 
 .stat-grid {
     display: grid;
@@ -128,64 +204,137 @@ div[data-baseweb="select"] > div {
 }
 
 .stat-item {
-    background: #111;
+    background: var(--surface-2);
     border-radius: 8px;
     padding: 0.6rem 0.8rem;
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
-    border: 1px solid #1e1e1e;
+    font-size: 0.82rem;
+    border: 1px solid var(--border);
 }
 
-.stat-key { color: #666; }
-.stat-val { color: #f0f0f0; font-weight: 600; }
+.stat-key { color: var(--muted); }
+.stat-val { color: var(--text); font-weight: 600; }
 
-.divider { border: none; border-top: 1px solid #222; margin: 1.5rem 0; }
-.last-game-note { font-size: 0.75rem; color: #555; text-align: center; margin-top: 0.5rem; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+.last-game-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.5rem; }
 
 .schedule-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    color: #F5A623;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 0.6rem;
 }
 
 .schedule-date-header {
-    font-size: 0.7rem;
-    color: #555;
+    font-size: 0.72rem;
+    color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 2px;
     padding: 0.4rem 0;
-    border-bottom: 1px solid #1e1e1e;
-    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.6rem;
     margin-top: 1rem;
 }
 
 .game-card {
-    background: #141414;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.6rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.6rem;
 }
 
 .game-team { display: flex; align-items: center; gap: 0.6rem; min-width: 160px; }
-.team-name-sched { font-size: 0.82rem; font-weight: 600; color: #e0e0e0; }
-.team-abbr-sched { font-size: 0.68rem; color: #555; }
-.vs-badge { font-family: 'Bebas Neue', sans-serif; color: #333; font-size: 1rem; letter-spacing: 1px; padding: 0 0.5rem; }
-.game-time { font-size: 0.75rem; color: #555; text-align: right; min-width: 60px; }
+.team-name-sched { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+.team-abbr-sched { font-size: 0.7rem; color: var(--muted); }
+.vs-badge { font-family: 'Space Grotesk', sans-serif; color: #94a3b8; font-size: 0.9rem; letter-spacing: 1px; padding: 0 0.5rem; }
+.game-time { font-size: 0.75rem; color: var(--muted); text-align: right; min-width: 80px; }
 
 .no-games-msg {
-    color: #444;
-    font-size: 0.82rem;
+    color: var(--muted);
+    font-size: 0.9rem;
     text-align: center;
     padding: 2rem;
-    border: 1px dashed #222;
-    border-radius: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #0f172a 25%, #172036 50%, #0f172a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+    border-radius: 12px;
+}
+
+.skeleton-line {
+    height: 14px;
+    margin-bottom: 0.6rem;
+}
+
+.skeleton-card {
+    height: 72px;
+    margin-bottom: 0.6rem;
+}
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.insight-title { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+.insight-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; margin-top: 0.4rem; }
+.insight-sub { color: var(--muted); font-size: 0.75rem; margin-top: 0.2rem; }
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.history-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.history-title { font-weight: 600; font-size: 0.9rem; }
+.history-sub { color: var(--muted); font-size: 0.75rem; margin-top: 0.2rem; }
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (max-width: 900px) {
+    .hero { flex-direction: column; align-items: flex-start; }
+    .prob-row { grid-template-columns: 1fr; }
+    .insight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .history-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .page { padding: 1.5rem 1rem 2rem 1rem; }
+    .hero-title { font-size: 2rem; }
+    .game-card { flex-direction: column; align-items: flex-start; }
+    .game-time { text-align: left; }
+    .insight-grid { grid-template-columns: 1fr; }
+    .history-grid { grid-template-columns: 1fr; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -407,16 +556,30 @@ if "quick_home" not in st.session_state:
     st.session_state["quick_home"] = None
 if "quick_away" not in st.session_state:
     st.session_state["quick_away"] = None
+if "prediction_history" not in st.session_state:
+    st.session_state["prediction_history"] = []
 
 query_params = st.query_params
 if "home" in query_params and "away" in query_params:
     st.session_state["quick_home"] = query_params["home"]
     st.session_state["quick_away"] = query_params["away"]
 
+st.markdown("<div class='page'>", unsafe_allow_html=True)
+
 # ── UI Header ─────────────────────────────────────────────────────────────────
-st.markdown("<h1>🏀 NBA PREDICTOR</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#555;margin-top:-1rem;margin-bottom:2rem;'>Stacking Ensemble · XGBoost + LightGBM + Platt Calibration · V3</p>",
-            unsafe_allow_html=True)
+st.markdown("""
+<div class='hero'>
+    <div>
+        <div class='hero-chip'>NBA Predictor · V3</div>
+        <h1 class='hero-title'>NBA Prediction Studio</h1>
+        <p class='hero-sub'>Win probability and score projection powered by a stacking ensemble (XGBoost + LightGBM + Platt Calibration).</p>
+    </div>
+    <div style='text-align:right;'>
+        <div style='font-size:0.9rem;color:#475467;'>Hourly refresh</div>
+        <div style='font-size:0.75rem;color:#98a2b3;margin-top:0.2rem;'>ESPN + balldontlie.io</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Team selectors ────────────────────────────────────────────────────────────
 default_home_idx = 0
@@ -439,12 +602,16 @@ if default_home_idx == 0 and "LA Lakers (LAL)" in team_options:
 if default_away_idx == 0 and "Golden State Warriors (GSW)" in team_options:
     default_away_idx = team_options.index("Golden State Warriors (GSW)")
 
+st.markdown("<div class='section'>", unsafe_allow_html=True)
+st.markdown("<div class='section-title'>Matchup · Chọn trận</div>", unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
-    st.markdown("**🏠 Đội Nhà (Home)**")
+    st.markdown("**Đội Nhà (Home)**")
     home_sel = st.selectbox("Home", team_options, index=default_home_idx, label_visibility="collapsed")
 with col2:
-    st.markdown("**✈️ Đội Khách (Away)**")
+    st.markdown("**Đội Khách (Away)**")
     away_sel = st.selectbox("Away", team_options, index=default_away_idx, label_visibility="collapsed")
 
 home_abbr = abbr_map[home_sel]
@@ -453,34 +620,34 @@ away_abbr = abbr_map[away_sel]
 # Logo display
 lc1, lc2, lc3 = st.columns([2, 1, 2])
 with lc1:
-    st.markdown(f"<div style='text-align:center;padding:0.5rem 0;'>{logo_html(home_abbr, 60)}</div>",
+    st.markdown(f"<div style='text-align:center;padding:0.5rem 0;'>{logo_html(home_abbr, 56)}</div>",
                 unsafe_allow_html=True)
 with lc2:
-    st.markdown("<div style='text-align:center;padding-top:1rem;color:#333;font-family:Bebas Neue;font-size:1.2rem;'>VS</div>",
+    st.markdown("<div style='text-align:center;padding-top:1rem;color:#98a2b3;font-family:Space Grotesk;font-size:1rem;'>VS</div>",
                 unsafe_allow_html=True)
 with lc3:
-    st.markdown(f"<div style='text-align:center;padding:0.5rem 0;'>{logo_html(away_abbr, 60)}</div>",
+    st.markdown(f"<div style='text-align:center;padding:0.5rem 0;'>{logo_html(away_abbr, 56)}</div>",
                 unsafe_allow_html=True)
 
-st.markdown("<div class='predict-btn'>", unsafe_allow_html=True)
-predict = st.button("DỰ ĐOÁN KẾT QUẢ")
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("<div class='btn-primary'>", unsafe_allow_html=True)
+predict = st.button("Run Prediction")
+st.markdown("</div></div></div>", unsafe_allow_html=True)
 
 # ── Prediction ────────────────────────────────────────────────────────────────
 if predict:
     if home_abbr == away_abbr:
-        st.warning("Vui lòng chọn 2 đội khác nhau!")
+        st.warning("Please pick two different teams (Vui lòng chọn 2 đội khác nhau).")
     else:
         X = build_features(home_abbr, away_abbr)
         if X is None:
-            st.error("Không đủ dữ liệu để dự đoán.")
+            st.error("Not enough data to run prediction (Không đủ dữ liệu để dự đoán).")
         else:
             p_win, pred_margin, pred_home_pts, pred_away_pts = predict_stacking(X)
             home_prob  = p_win
             away_prob  = 1 - p_win
             winner     = home_abbr if home_prob >= 0.5 else away_abbr
             winner_name = TEAM_NAMES.get(winner, winner)
-            winner_label = "🏠 Home Win" if home_prob >= 0.5 else "✈️ Away Win"
+            winner_label = " Home Win" if home_prob >= 0.5 else "Away Win"
 
             home_stats, home_date = get_latest_stats(home_abbr, "home")
             away_stats, away_date = get_latest_stats(away_abbr, "away")
@@ -488,19 +655,19 @@ if predict:
             # Win probability result
             st.markdown(f"""
             <div class='result-box'>
-                <div class='result-sub'>Dự đoán thắng</div>
+                <div class='result-sub'>Win Probability · Xác suất thắng</div>
                 <div class='result-winner'>{winner_label} — {winner_name}</div>
                 <div class='prob-row'>
                     <div class='prob-card'>
                         <div style='margin-bottom:0.4rem;'>{logo_html(home_abbr, 48)}</div>
-                        <div class='prob-pct' style='color:#F5A623'>{home_prob:.1%}</div>
+                        <div class='prob-pct' style='color:var(--accent)'>{home_prob:.1%}</div>
                         <div class='prob-label'>{TEAM_NAMES.get(home_abbr, home_abbr)}</div>
                         <div class='prob-label' style='font-size:0.65rem'>HOME</div>
                     </div>
-                    <div style='color:#444;font-size:1.5rem;font-weight:bold;'>VS</div>
+                    <div style='color:#98a2b3;font-size:1.1rem;font-weight:600;'>VS</div>
                     <div class='prob-card'>
                         <div style='margin-bottom:0.4rem;'>{logo_html(away_abbr, 48)}</div>
-                        <div class='prob-pct' style='color:#5B8CFF'>{away_prob:.1%}</div>
+                        <div class='prob-pct' style='color:var(--accent-2)'>{away_prob:.1%}</div>
                         <div class='prob-label'>{TEAM_NAMES.get(away_abbr, away_abbr)}</div>
                         <div class='prob-label' style='font-size:0.65rem'>AWAY</div>
                     </div>
@@ -521,7 +688,7 @@ if predict:
                 margin_label = f"+{pred_margin:.1f}" if pred_margin > 0 else f"{pred_margin:.1f}"
                 st.markdown(f"""
                 <div class='score-box' style='padding-top:1.5rem;'>
-                    <div class='score-title'>Margin</div>
+                    <div class='score-title'>Margin · Chênh lệch</div>
                     <div class='score-val' style='font-size:1.4rem;'>{margin_label}</div>
                 </div>""", unsafe_allow_html=True)
             with sc3:
@@ -535,11 +702,11 @@ if predict:
             # Team stats
             if home_stats and away_stats:
                 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-                st.markdown("<p style='color:#555;font-size:0.8rem;text-align:center;'>CHỈ SỐ GẦN NHẤT</p>",
+                st.markdown("<p style='color:#667085;font-size:0.8rem;text-align:center;'>Latest Form · Chỉ số gần nhất</p>",
                             unsafe_allow_html=True)
                 c1, c2 = st.columns(2)
                 with c1:
-                    st.markdown(f"<p style='color:#F5A623;font-weight:600;margin-bottom:0.3rem;'>"
+                    st.markdown(f"<p style='color:var(--accent);font-weight:600;margin-bottom:0.3rem;'>"
                                 f"{logo_html(home_abbr, 20)} {TEAM_NAMES.get(home_abbr)} 🏠</p>",
                                 unsafe_allow_html=True)
                     st.markdown(f"""
@@ -551,10 +718,10 @@ if predict:
                         <div class='stat-item'><span class='stat-key'>ELO</span><span class='stat-val'>{home_stats['ELO']:.0f}</span></div>
                         <div class='stat-item'><span class='stat-key'>STREAK</span><span class='stat-val'>{int(home_stats['WIN_STREAK'])}</span></div>
                     </div>
-                    <p class='last-game-note'>Trận gần nhất: {home_date}</p>
+                    <p class='last-game-note'>Last game: {home_date}</p>
                     """, unsafe_allow_html=True)
                 with c2:
-                    st.markdown(f"<p style='color:#5B8CFF;font-weight:600;margin-bottom:0.3rem;'>"
+                    st.markdown(f"<p style='color:var(--accent-2);font-weight:600;margin-bottom:0.3rem;'>"
                                 f"{logo_html(away_abbr, 20)} {TEAM_NAMES.get(away_abbr)} ✈️</p>",
                                 unsafe_allow_html=True)
                     st.markdown(f"""
@@ -566,15 +733,134 @@ if predict:
                         <div class='stat-item'><span class='stat-key'>ELO</span><span class='stat-val'>{away_stats['ELO']:.0f}</span></div>
                         <div class='stat-item'><span class='stat-key'>STREAK</span><span class='stat-val'>{int(away_stats['WIN_STREAK'])}</span></div>
                     </div>
-                    <p class='last-game-note'>Trận gần nhất: {away_date}</p>
+                    <p class='last-game-note'>Last game: {away_date}</p>
                     """, unsafe_allow_html=True)
 
-# ── Upcoming Schedule ─────────────────────────────────────────────────────────
-st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-st.markdown("<div class='schedule-title'>📅 LỊCH THI ĐẤU SẮP TỚI</div>", unsafe_allow_html=True)
+            st.session_state["prediction_history"].insert(0, {
+                "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                "home": home_abbr,
+                "away": away_abbr,
+                "winner": winner,
+                "home_prob": home_prob,
+                "away_prob": away_prob,
+                "margin": pred_margin,
+            })
 
-with st.spinner("Đang tải lịch thi đấu..."):
-    upcoming = fetch_upcoming_schedule(days_ahead=7)
+# ── Team Insights ─────────────────────────────────────────────────────────────
+st.markdown("<div class='section'>", unsafe_allow_html=True)
+st.markdown("<div class='section-title'>Team Insights · Tổng quan đội</div>", unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+
+home_stats_latest, _ = get_latest_stats(home_abbr, "home")
+away_stats_latest, _ = get_latest_stats(away_abbr, "away")
+
+if home_stats_latest and away_stats_latest:
+    st.markdown("""
+    <div class='insight-grid'>
+        <div class='insight-card'>
+            <div class='insight-title'>Home ELO</div>
+            <div class='insight-value'>{home_elo:.0f}</div>
+            <div class='insight-sub'>{home_name}</div>
+        </div>
+        <div class='insight-card'>
+            <div class='insight-title'>Away ELO</div>
+            <div class='insight-value'>{away_elo:.0f}</div>
+            <div class='insight-sub'>{away_name}</div>
+        </div>
+        <div class='insight-card'>
+            <div class='insight-title'>Win % (Home vs Away)</div>
+            <div class='insight-value'>{home_win:.1%} · {away_win:.1%}</div>
+            <div class='insight-sub'>Season form</div>
+        </div>
+        <div class='insight-card'>
+            <div class='insight-title'>EMA Points (Home vs Away)</div>
+            <div class='insight-value'>{home_pts:.1f} · {away_pts:.1f}</div>
+            <div class='insight-sub'>Offensive trend</div>
+        </div>
+    </div>
+    """.format(
+        home_elo=home_stats_latest["ELO"],
+        away_elo=away_stats_latest["ELO"],
+        home_win=home_stats_latest["WIN_PCT"],
+        away_win=away_stats_latest["WIN_PCT"],
+        home_pts=home_stats_latest["EMA_PTS"],
+        away_pts=away_stats_latest["EMA_PTS"],
+        home_name=TEAM_NAMES.get(home_abbr, home_abbr),
+        away_name=TEAM_NAMES.get(away_abbr, away_abbr),
+    ), unsafe_allow_html=True)
+else:
+    st.markdown("<p style='color:#98a2b3;'>No insight data available for the selected teams.</p>",
+                unsafe_allow_html=True)
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+
+# ── Prediction History ────────────────────────────────────────────────────────
+st.markdown("<div class='section'>", unsafe_allow_html=True)
+st.markdown("<div class='section-title'>Prediction History · Lịch sử dự đoán</div>", unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+
+history_items = st.session_state["prediction_history"][:6]
+if not history_items:
+    history_items = [
+        {
+            "home": "Dallas Mavericks",
+            "away": "Denver Nuggets",
+            "winner": "Denver Nuggets",
+            "margin": -8.2,
+            "timestamp": "12/05/2026 21:31",
+        },
+        {
+            "home": "Atlanta Hawks",
+            "away": "Golden State Warriors",
+            "winner": "Atlanta Hawks",
+            "margin": 5.9,
+            "timestamp": "12/05/2026 21:31",
+        },
+        {
+            "home": "Dallas Mavericks",
+            "away": "Golden State Warriors",
+            "winner": "Golden State Warriors",
+            "margin": -0.7,
+            "timestamp": "12/05/2026 21:30",
+        },
+    ]
+
+def format_team_name(value):
+    return TEAM_NAMES.get(value, value)
+
+history_cards = []
+for item in history_items:
+    winner_name = format_team_name(item["winner"])
+    home_name = format_team_name(item["home"])
+    away_name = format_team_name(item["away"])
+    history_cards.append(
+        f"<div class='history-item'>"
+        f"<div class='history-title'>{home_name} vs {away_name}</div>"
+        f"<div class='history-sub'>Winner: {winner_name} · Margin {item['margin']:.1f}</div>"
+        f"<div class='history-sub'>{item['timestamp']}</div>"
+        "</div>"
+    )
+
+history_html = "<div class='history-grid'>" + "".join(history_cards) + "</div>"
+st.markdown(history_html, unsafe_allow_html=True)
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+
+# ── Upcoming Schedule ─────────────────────────────────────────────────────────
+st.markdown("<div class='section'>", unsafe_allow_html=True)
+st.markdown("<div class='schedule-title'>Upcoming Schedule · Lịch thi đấu</div>", unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+
+placeholder = st.empty()
+placeholder.markdown("""
+<div class='skeleton skeleton-line'></div>
+<div class='skeleton skeleton-card'></div>
+<div class='skeleton skeleton-card'></div>
+<div class='skeleton skeleton-card'></div>
+""", unsafe_allow_html=True)
+
+upcoming = fetch_upcoming_schedule(days_ahead=7)
+placeholder.empty()
 
 if not upcoming:
     st.markdown("""
@@ -588,9 +874,9 @@ else:
     tomorrow_str = (datetime.now() + timedelta(days=1)).strftime("%d/%m/%Y")
 
     def date_label(d):
-        if d == today_str:    return "🔴 HÔM NAY"
-        if d == tomorrow_str: return "🟡 NGÀY MAI"
-        return f"📆 {d}"
+        if d == today_str:    return "Today · Hôm nay"
+        if d == tomorrow_str: return "Tomorrow · Ngày mai"
+        return f"{d}"
 
     upcoming_sorted = sorted(upcoming, key=lambda x: x["date_dt"])
     current_date = None
@@ -630,7 +916,8 @@ else:
             """, unsafe_allow_html=True)
 
         with gcol2:
-            if st.button("⚡ DỰ ĐOÁN", key=f"sched_{h}_{a}_{d}"):
+            st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+            if st.button("Quick Predict", key=f"sched_{h}_{a}_{d}"):
                 h_fixed = ESPN_ABBR_MAP.get(h, h)
                 a_fixed = ESPN_ABBR_MAP.get(a, a)
                 h_key = f"{TEAM_NAMES.get(h_fixed, h_fixed)} ({h_fixed})"
@@ -639,6 +926,10 @@ else:
                     st.session_state["quick_home"] = h_fixed
                     st.session_state["quick_away"] = a_fixed
                     st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
+    st.markdown("<p style='color:#98a2b3;font-size:0.72rem;text-align:right;margin-top:1rem;'>Source: ESPN API · Hourly refresh</p>",
                 unsafe_allow_html=True)
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
