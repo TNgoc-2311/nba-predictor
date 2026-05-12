@@ -345,6 +345,9 @@ ESPN_ABBR_MAP = {
     "SA": "SAS", "GS": "GSW", "NY": "NYK",
     "NO": "NOP", "UTH": "UTA",
 }
+
+VN_TZ = timezone(timedelta(hours=7))
+
 @st.cache_data(ttl=3600)
 def fetch_upcoming_schedule(days_ahead=7):
     games = []
