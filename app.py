@@ -596,7 +596,10 @@ else:
     current_date = None
 
     for game in upcoming_sorted:
-        d, h, a, t = game["date"], game["home"], game["away"], game["time"]
+        d = game["date"]
+        h = ESPN_ABBR_MAP.get(game["home"], game["home"])  
+        a = ESPN_ABBR_MAP.get(game["away"], game["away"])  
+        t = game["time"]
 
         if d != current_date:
             current_date = d
