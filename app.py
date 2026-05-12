@@ -625,11 +625,13 @@ else:
 
         with gcol2:
             if st.button("⚡ DỰ ĐOÁN", key=f"sched_{h}_{a}_{d}"):
-                h_key = f"{TEAM_NAMES.get(h, h)} ({h})"
-                a_key = f"{TEAM_NAMES.get(a, a)} ({a})"
+                h_fixed = ESPN_ABBR_MAP.get(h, h)
+                a_fixed = ESPN_ABBR_MAP.get(a, a)
+                h_key = f"{TEAM_NAMES.get(h_fixed, h_fixed)} ({h_fixed})"
+                a_key = f"{TEAM_NAMES.get(a_fixed, a_fixed)} ({a_fixed})"
                 if h_key in team_options and a_key in team_options:
-                    st.session_state["quick_home"] = h
-                    st.session_state["quick_away"] = a
+                    st.session_state["quick_home"] = h_fixed
+                    st.session_state["quick_away"] = a_fixed
                     st.rerun()
 
     st.markdown("<p style='color:#333;font-size:0.72rem;text-align:right;margin-top:1rem;'>Nguồn: ESPN API · Cập nhật mỗi giờ</p>",
