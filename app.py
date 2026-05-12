@@ -341,6 +341,10 @@ def get_latest_stats(team, role):
     return stats, latest["GAME_DATE"].strftime("%d/%m/%Y")
 
 # ── Fetch upcoming schedule ───────────────────────────────────────────────────
+ESPN_ABBR_MAP = {
+    "SA": "SAS", "GS": "GSW", "NY": "NYK",
+    "NO": "NOP", "UTH": "UTA",
+}
 @st.cache_data(ttl=3600)
 def fetch_upcoming_schedule(days_ahead=7):
     games = []
